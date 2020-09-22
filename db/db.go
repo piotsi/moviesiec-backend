@@ -9,6 +9,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+//Repository abc
+type Repository struct {
+	client *mongo.Client
+}
+
 // Init initializes connection to the database
 func Init() *mongo.Client {
 	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017")
