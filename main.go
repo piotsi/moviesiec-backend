@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"moviesiec/db"
+
+	"github.com/piotsik/moviesiec/db"
 )
 
 func main() {
