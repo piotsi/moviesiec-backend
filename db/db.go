@@ -11,12 +11,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-//Repository abc
 type Repository struct {
 	client *mongo.Client
 }
 
-// Init initializes connection to the database
 func Init() *mongo.Client {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
