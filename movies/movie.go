@@ -1,6 +1,14 @@
 package movies
 
-// Movie represents details about a movie
+import (
+	"context"
+	"log"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
 type Movie struct {
 	Title    string
 	Director string
@@ -9,14 +17,39 @@ type Movie struct {
 	Ratings  int
 }
 
-// Repository gives access to movies collection
 type Repository interface {
-	// GetAll gets all movies from the database
 	GetAll() []Movie
-
-	// Get gets specific movie from the database
 	Get(int) (Movie, error)
-
-	// Add adds a movie to the database
 	Add(Movie) error
+}
+
+func GetAll(client *mongo.Client) []*Movie {
+	var moviesList []*Movie
+
+	moviesCollection := client.Database("moviesiec").Collection("movies")
+
+	findOptions := options.Find().SetLimit(2)
+
+	cur, err := moviesCollection.Find(context.TODO(), bson.D{{}}, findOptions)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for cur.Next(context.TODO()) {
+		var elem Movie
+		err := cur.Decode(&elem)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		moviesList = append(moviesList, &elem)
+	}
+
+	if err := cur.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	cur.Close(context.TODO())
+
+	return moviesList
 }
