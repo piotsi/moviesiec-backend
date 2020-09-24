@@ -55,13 +55,16 @@ func GetAll(client *mongo.Client) []*Movie {
 	return moviesList
 }
 
-func Add(client *mongo.Client, movie Movie) {
+func Add(client *mongo.Client, movie Movie) error {
 	moviesCollection := client.Database("moviesiec").Collection("movies")
 
 	_, err := moviesCollection.InsertOne(context.TODO(), movie)
 	if err != nil {
 		log.Fatal(err)
+		return err
 	}
 
-	fmt.Println("Added new movie")
+	fmt.Println("Added new movie", movie)
+
+	return nil
 }

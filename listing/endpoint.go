@@ -27,8 +27,15 @@ func MakeAddMovieEndpoint(client *mongo.Client) func(w http.ResponseWriter, r *h
 
 		var movie movies.Movie
 
-		json.NewDecoder(r.Body).Decode(&movie)
+		err := json.NewDecoder(r.Body).Decode(&movie)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
 
-		movies.Add(client, movie)
+		err = movies.Add(client, movie)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		}
 	}
 }
