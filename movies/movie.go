@@ -2,6 +2,7 @@ package movies
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -10,11 +11,11 @@ import (
 )
 
 type Movie struct {
-	Title    string
-	Director string
-	Year     int
-	Rating   float64
-	Ratings  int
+	Title    string  `json:"title"`
+	Director string  `json:"director"`
+	Year     int     `json:"year"`
+	Rating   float64 `json:"rating"`
+	Ratings  int     `json:"ratings"`
 }
 
 type Repository interface {
@@ -52,4 +53,17 @@ func GetAll(client *mongo.Client) []*Movie {
 	cur.Close(context.TODO())
 
 	return moviesList
+}
+
+func Add(client *mongo.Client, movie Movie) {
+	moviesCollection := client.Database("moviesiec").Collection("movies")
+
+	fmt.Println(movie)
+
+	_, err := moviesCollection.InsertOne(context.TODO(), movie)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Added new movie")
 }

@@ -16,6 +16,7 @@ func main() {
 
 	router := httprouter.New()
 	router.GET("/movies", listing.MakeGetMoviesEndpoint(client))
+	router.POST("/movies/add", listing.MakeAddMovieEndpoint(client))
 
 	log.Fatal(http.ListenAndServe(":8080", router))
 }

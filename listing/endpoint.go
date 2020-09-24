@@ -20,3 +20,15 @@ func MakeGetMoviesEndpoint(client *mongo.Client) func(w http.ResponseWriter, r *
 		json.NewEncoder(w).Encode(moviesList)
 	}
 }
+
+func MakeAddMovieEndpoint(client *mongo.Client) func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+		w.Header().Set("Content-Type", "application/json")
+
+		var movie movies.Movie
+
+		json.NewDecoder(r.Body).Decode(&movie)
+
+		movies.Add(client, movie)
+	}
+}
