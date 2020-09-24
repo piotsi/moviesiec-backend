@@ -29,7 +29,7 @@ func GetAll(client *mongo.Client) []*Movie {
 
 	moviesCollection := client.Database("moviesiec").Collection("movies")
 
-	findOptions := options.Find().SetLimit(2)
+	findOptions := options.Find().SetLimit(100)
 
 	cur, err := moviesCollection.Find(context.TODO(), bson.D{{}}, findOptions)
 	if err != nil {
@@ -57,8 +57,6 @@ func GetAll(client *mongo.Client) []*Movie {
 
 func Add(client *mongo.Client, movie Movie) {
 	moviesCollection := client.Database("moviesiec").Collection("movies")
-
-	fmt.Println(movie)
 
 	_, err := moviesCollection.InsertOne(context.TODO(), movie)
 	if err != nil {
