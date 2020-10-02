@@ -21,6 +21,20 @@ func MakeGetMoviesEndpoint(client *mongo.Client) func(w http.ResponseWriter, r *
 	}
 }
 
+func MakeGetMovieEndpoint(client *mongo.Client) func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	return func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		w.Header().Set("Content-Type", "application/json")
+
+		movie, err := movies.Get(p.ByName("longid"), client)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			return
+		}
+
+		json.NewEncoder(w).Encode(movie)
+	}
+}
+
 func MakeAddMovieEndpoint(client *mongo.Client) func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		w.Header().Set("Content-Type", "application/json")

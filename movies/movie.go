@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -11,6 +13,7 @@ import (
 )
 
 type Movie struct {
+	StringID string  `json:"stringid"`
 	Title    string  `json:"title"`
 	Director string  `json:"director"`
 	Year     int     `json:"year"`
@@ -20,7 +23,7 @@ type Movie struct {
 
 type Repository interface {
 	GetAll() []Movie
-	Get(int) (Movie, error)
+	Get(string) (Movie, error)
 	Add(Movie) error
 }
 
@@ -55,8 +58,23 @@ func GetAll(client *mongo.Client) []*Movie {
 	return moviesList
 }
 
+func Get(stringID string, client *mongo.Client) (Movie, error) {
+	var movie Movie
+
+	moviesCollection := client.Database("moviesiec").Collection("movies")
+
+	err := moviesCollection.FindOne(context.TODO(), bson.D{{"stringid", stringID}}).Decode(&movie)
+	if err != nil {
+		return movie, err
+	}
+
+	return movie, nil
+}
+
 func Add(client *mongo.Client, movie Movie) error {
 	moviesCollection := client.Database("moviesiec").Collection("movies")
+
+	movie.StringID = GenerateStringID(movie.Title, movie.Year)
 
 	_, err := moviesCollection.InsertOne(context.TODO(), movie)
 	if err != nil {
@@ -67,4 +85,12 @@ func Add(client *mongo.Client, movie Movie) error {
 	fmt.Println("Added new movie", movie)
 
 	return nil
+}
+
+func GenerateStringID(title string, year int) string {
+	stringID := strings.Replace(strings.ToLower(title), " ", "-", -1)
+	stringYear := strconv.Itoa(year)
+	stringID = stringID + "-" + stringYear
+
+	return stringID
 }
