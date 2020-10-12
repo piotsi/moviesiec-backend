@@ -3,9 +3,10 @@ package listing
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/piotsik/moviesiec/movies"
+	"github.com/piotsik/moviesiec-backend/movies"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -15,7 +16,14 @@ func MakeGetMoviesEndpoint(client *mongo.Client) func(w http.ResponseWriter, r *
 	return func(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		w.Header().Set("Content-Type", "application/json")
 
-		moviesList := movies.GetAll(client)
+		page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+
+		moviesList := movies.GetAll(int64(page), client)
+
+		if moviesList == nil {
+			http.Error(w, "No movies to display", http.StatusNotFound)
+			return
+		}
 
 		json.NewEncoder(w).Encode(moviesList)
 	}

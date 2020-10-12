@@ -27,12 +27,16 @@ type Repository interface {
 	Add(Movie) error
 }
 
-func GetAll(client *mongo.Client) []*Movie {
+func GetAll(page int64, client *mongo.Client) []*Movie {
 	var moviesList []*Movie
+	var moviesOnPage int64 = 5
 
 	moviesCollection := client.Database("moviesiec").Collection("movies")
 
-	findOptions := options.Find().SetLimit(100)
+	findOptions := options.Find()
+	findOptions.SetSort(bson.D{{"title", 1}})
+	findOptions.SetLimit(moviesOnPage)
+	findOptions.SetSkip(page * moviesOnPage)
 
 	cur, err := moviesCollection.Find(context.TODO(), bson.D{{}}, findOptions)
 	if err != nil {
