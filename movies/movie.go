@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 	"strings"
 
@@ -27,16 +28,15 @@ type Repository interface {
 	Add(Movie) error
 }
 
-func GetAll(page int64, client *mongo.Client) []*Movie {
+func GetAll(r *http.Request, client *mongo.Client) []*Movie {
 	var moviesList []*Movie
-	var moviesOnPage int64 = 5
 
 	moviesCollection := client.Database("moviesiec").Collection("movies")
 
-	findOptions := options.Find()
-	findOptions.SetSort(bson.D{{"title", 1}})
-	findOptions.SetLimit(moviesOnPage)
-	findOptions.SetSkip(page * moviesOnPage)
+	findOptions := FindOptions(r, 5)
+	if findOptions == nil {
+		return nil
+	}
 
 	cur, err := moviesCollection.Find(context.TODO(), bson.D{{}}, findOptions)
 	if err != nil {
@@ -97,4 +97,30 @@ func GenerateStringID(title string, year int) string {
 	stringID = stringID + "-" + stringYear
 
 	return stringID
+}
+
+func FindOptions(r *http.Request, moviesOnPage int64) *options.FindOptions {
+	page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+	if page < 1 {
+		page = 1
+	}
+
+	var sort bson.D
+	switch r.URL.Query().Get("sort") {
+	case "titleDESC":
+		sort = append(sort, bson.E{"title", -1})
+	case "ratingASC":
+		sort = append(sort, bson.E{"rating", 1})
+	case "ratingDESC":
+		sort = append(sort, bson.E{"rating", -1})
+	default:
+		sort = append(sort, bson.E{"title", 1})
+	}
+
+	findOptions := options.Find()
+	findOptions.SetSort(sort)
+	findOptions.SetLimit(moviesOnPage)
+	findOptions.SetSkip(moviesOnPage * int64(page-1))
+
+	return findOptions
 }
