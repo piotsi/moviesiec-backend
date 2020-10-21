@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"github.com/rs/cors"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/piotsik/moviesiec-backend/db"
@@ -23,5 +24,6 @@ func main() {
 		fmt.Fprintf(w, "hello, %s!\n", r.URL.Query().Get("name"))
 	})
 
-	log.Fatal(http.ListenAndServe(":8080", router))
+	handler := cors.Default().Handler(router)
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
