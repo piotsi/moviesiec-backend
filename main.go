@@ -10,6 +10,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 	"github.com/piotsik/moviesiec-backend/db"
 	"github.com/piotsik/moviesiec-backend/listing"
+	"github.com/piotsik/moviesiec-backend/login"
 )
 
 func main() {
@@ -20,6 +21,7 @@ func main() {
 	router.GET("/movies", listing.MakeGetMoviesEndpoint(client))
 	router.GET("/movies/:longid", listing.MakeGetMovieEndpoint(client))
 	router.POST("/movies/add", listing.MakeAddMovieEndpoint(client))
+	router.POST("/user/register", login.MakeSignOnEndpoint(client))
 	router.GET("/hello", func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		fmt.Fprintf(w, "hello, %s!\n", r.URL.Query().Get("name"))
 	})
